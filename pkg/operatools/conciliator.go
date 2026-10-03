@@ -6,8 +6,8 @@ type Conciliator struct {
 	Log logr.Logger
 }
 
-func newConciliator(log logr.Logger) *Conciliator {
-	return &Conciliator{
-		Log: log,
-	}
-}
+// func newConciliator(log logr.Logger) *Conciliator {
+// 	return &Conciliator{
+// 		Log: log,
+// 	}
+// }
