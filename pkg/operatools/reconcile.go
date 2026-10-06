@@ -13,7 +13,8 @@ type Reconciler interface {
 	Process(conciliator *Conciliator) error
 }
 
-func Reconcile(r Reconciler, c client.Client, req ctrl.Request, ctx context.Context, object client.Object) (ctrl.Result, error) {
+func Reconcile(r Reconciler, c client.Client, req ctrl.Request,
+	ctx context.Context, object client.Object) (ctrl.Result, error) {
 	if err := r.Get(ctx, req.NamespacedName, object); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}

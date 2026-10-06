@@ -59,9 +59,9 @@ func (s *Server) CreateNamespace(response http.ResponseWriter, req *http.Request
 	response.WriteHeader(http.StatusCreated)
 }
 
-func NewServer(addr string, client client.Client) *Server {
+func NewServer(addr string, c client.Client) *Server {
 	return &Server{
 		Addr:   addr,
-		Client: client,
+		Client: c,
 	}
 }
