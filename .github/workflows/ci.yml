@@ -1,0 +1,89 @@
+name: borrow - CI
+
+on:
+  push:
+    branches-ignore:
+      - "no-ga/**"
+  pull_request:
+    branches-ignore:
+      - "no-ga/**"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+      
+      - name: Build
+        run: make
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: borrow
+          path: bin/manager
+          retention-days: 5
+
+    
+
+  open_pull_request:
+      if: (github.ref_name == 'develop' || github.ref_name == 'main') && github.event_name == 'push'
+      needs:
+        - build
+      runs-on: ubuntu-latest
+      permissions:
+        pull-requests: write
+        contents: read
+      steps:
+        - uses: actions/checkout@v6
+          with:
+            fetch-depth: 0
+
+        - name: Check diff commits
+          env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            if [[ "${{ github.ref_name }}" == "staging" ]]; then
+                AHEAD_COMMITS=$(gh api repos/${{ github.repository }}/compare/main...${{ github.ref_name }} --jq '.ahead_by')
+            else
+                AHEAD_COMMITS=$(gh api repos/${{ github.repository }}/compare/staging...${{ github.ref_name }} --jq '.ahead_by')
+            fi
+
+            if [ "$AHEAD_COMMITS" -eq 0 ]; then
+              exit 0
+            fi
+  
+        - name: Create or Update PR
+          env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            if [[ "${{ github.ref_name }}" == "staging" ]]; then
+                BASE_BRANCH="main"
+                COMPARE_TARGET="origin/main"
+            else
+                BASE_BRANCH="staging"
+                COMPARE_TARGET="origin/staging"
+            fi
+
+            BACKLINE=$'\n'
+            COMMITS_LIST="### List of changements:${BACKLINE}"
+            COMMITS_LIST+="$(git log ${COMPARE_TARGET}..HEAD --oneline --pretty=format:"- %s (%h)")"
+
+            gh pr create \
+              --title "merge: ${{ github.ref_name }} -> ${BASE_BRANCH}" \
+              --body "$COMMITS_LIST" \
+              --base "$BASE_BRANCH" \
+              --head "${{ github.ref_name }}" || {
+                
+                PR_NUMBER=$(gh pr list --head "${{ github.ref_name }}" --base "$BASE_BRANCH" --json "number" -q '.[0].number')
+        
+                if [ -n "$PR_NUMBER" ]; then
+                    gh pr edit "$PR_NUMBER" --body "$COMMITS_LIST"
+                else
+                    exit 0
+                fi
+            }
