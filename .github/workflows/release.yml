@@ -2,7 +2,7 @@ name: Release Stable
 
 on:
   workflow_run:
-    workflows: ["borrow - CI", "Tests", "E2E Tests", "Lint"]
+    workflows: ["borrow - CI"]
     types: [completed]
     branches: [stable]
 
