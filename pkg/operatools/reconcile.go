@@ -2,7 +2,6 @@ package operatools
 
 import (
 	"context"
-	"fmt"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -13,6 +12,15 @@ type Reconciler interface {
 	Process(conciliator *Conciliator) error
 }
 
+func processRessource(conciliator *Conciliator, req ctrl.Request, r Reconciler) error {
+	conciliator.Log.Info("Processing Ressource",
+		"namespace", req.Namespace,
+		"name", req.Name,
+	)
+
+	return r.Process(conciliator)
+}
+
 func Reconcile(r Reconciler, c client.Client, req ctrl.Request,
 	ctx context.Context, object client.Object) (ctrl.Result, error) {
 	if err := r.Get(ctx, req.NamespacedName, object); err != nil {
@@ -21,8 +29,7 @@ func Reconcile(r Reconciler, c client.Client, req ctrl.Request,
 
 	conciliator := newConciliator(ctrl.Log, object)
 
-	conciliator.Log.Info(fmt.Sprintf("Process %s", req.Name))
-	if err := r.Process(conciliator); err != nil {
+	if err := processRessource(conciliator, req, r); err != nil {
 		return ctrl.Result{}, err
 	}
 
