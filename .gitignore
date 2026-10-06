@@ -26,3 +26,33 @@ go.work
 *.swo
 *~
 __debug*
+
+# Build and dependency artifacts
+/target
+/build
+/dist
+/out
+/node_modules
+/.venv
+/venv
+/__pycache__/
+*.py[cod]
+*.class
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Environment and editor files
+.env
+.env.*
+!.env.example
+.DS_Store
+.idea/
+.vscode/
+
+*.o
+bin/
+build/
