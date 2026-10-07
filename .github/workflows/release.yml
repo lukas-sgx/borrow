@@ -23,8 +23,8 @@ jobs:
         id: release
         with:
           target-branch: stable
-          config-file: release-config.json
-          manifest-file: .release-manifest.json
+          config-file: .github/release-config.json
+          manifest-file: .github/.release-manifest.json
 
       - uses: actions/checkout@v6
         if: ${{ steps.release.outputs.release_created }}
