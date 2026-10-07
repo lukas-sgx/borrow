@@ -17,6 +17,4 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Run security-audit
-        run: |
-          go install golang.org/x/vuln/cmd/govulncheck@latest
-          govulncheck ./...
+        uses: golang/govulncheck-action@v1
