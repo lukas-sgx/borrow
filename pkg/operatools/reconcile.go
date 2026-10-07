@@ -9,15 +9,27 @@ import (
 
 type Reconciler interface {
 	client.Reader
-	Process() error
+	Process(conciliator *Conciliator) error
 }
 
-func Reconcile(r Reconciler, req ctrl.Request, ctx context.Context, object client.Object) (ctrl.Result, error) {
+func processRessource(conciliator *Conciliator, req ctrl.Request, r Reconciler) error {
+	conciliator.Log.Info("Processing Ressource",
+		"namespace", req.Namespace,
+		"name", req.Name,
+	)
+
+	return r.Process(conciliator)
+}
+
+func Reconcile(r Reconciler, c client.Client, req ctrl.Request,
+	ctx context.Context, object client.Object) (ctrl.Result, error) {
 	if err := r.Get(ctx, req.NamespacedName, object); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	if err := r.Process(); err != nil {
+	conciliator := newConciliator(ctrl.Log, object)
+
+	if err := processRessource(conciliator, req, r); err != nil {
 		return ctrl.Result{}, err
 	}
 
