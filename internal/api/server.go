@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	controller "github.com/lukas-sgx/borrow/internal/api/routes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -25,26 +26,9 @@ func (s *Server) shutdownServer(ctx context.Context, srv *http.Server) {
 	_ = srv.Shutdown(shutdownCtx)
 }
 
-func (s *Server) routesNamespace() http.Handler {
-	sub := http.NewServeMux()
-	sub.HandleFunc("POST /add", s.CreateNamespace)
-
-	return sub
-}
-
-func (s *Server) routes() http.Handler {
-	basePath := "/api/v1"
-
-	mux := http.NewServeMux()
-	mux.Handle(basePath+"/namespaces/",
-		http.StripPrefix(basePath+"/namespaces", s.routesNamespace()))
-
-	return mux
-}
-
 func (s *Server) Start(ctx context.Context) error {
 
-	srv := &http.Server{Addr: s.Addr, Handler: s.routes()}
+	srv := &http.Server{Addr: s.Addr, Handler: controller.Routes()}
 
 	go s.shutdownServer(ctx, srv)
 
@@ -52,11 +36,6 @@ func (s *Server) Start(ctx context.Context) error {
 		return err
 	}
 	return nil
-}
-
-func (s *Server) CreateNamespace(response http.ResponseWriter, req *http.Request) {
-	response.Header().Add("Content-type", "application/json")
-	response.WriteHeader(http.StatusCreated)
 }
 
 func NewServer(addr string, c client.Client) *Server {
