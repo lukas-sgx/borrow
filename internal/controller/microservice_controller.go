@@ -25,6 +25,7 @@ import (
 
 	brwv1alpha1 "github.com/lukas-sgx/borrow/api/v1alpha1"
 	"github.com/lukas-sgx/borrow/pkg/operatools"
+	"github.com/lukas-sgx/borrow/pkg/utils"
 )
 
 // MicroserviceReconciler reconciles a Microservice object
@@ -49,6 +50,7 @@ type MicroserviceReconciler struct {
 func (r *MicroserviceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	return operatools.Reconcile(
 		r,
+		r.Client,
 		req,
 		ctx,
 		&brwv1alpha1.Microservice{},
@@ -63,6 +65,10 @@ func (r *MicroserviceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *MicroserviceReconciler) Process() error {
-	return nil
+func (r *MicroserviceReconciler) Process(conciliator *operatools.Conciliator) error {
+	object := conciliator.Object.(*brwv1alpha1.Microservice)
+
+	return utils.NewRunner().
+		Run(func() error { return utils.ObjectNil(object) }).
+		Err()
 }
