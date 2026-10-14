@@ -8,14 +8,13 @@ import (
 
 	"github.com/lukas-sgx/borrow/api/v1alpha1"
 	"github.com/lukas-sgx/borrow/pkg/operatools"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type Endpoints struct {
 	Conciliator *operatools.Conciliator
 }
 
-func NewEndpoints(conciliator *operatools.Conciliator, client client.Client) *Endpoints {
+func NewEndpoints(conciliator *operatools.Conciliator) *Endpoints {
 	operatools.GetClient(conciliator, "microservice-sample", "sre-system", &v1alpha1.Microservice{})
 
 	return &Endpoints{
@@ -56,11 +55,17 @@ func (e *Endpoints) Get(response http.ResponseWriter, req *http.Request) {
 
 	response.Header().Set("Content-type", "application/json")
 	response.WriteHeader(http.StatusOK)
-	response.Write(data)
+
+	if _, err := response.Write(data); err != nil {
+		internalServerError(response, err)
+	}
 }
 
 func internalServerError(response http.ResponseWriter, err error) {
 	response.Header().Set("Content-type", "application/json")
 	response.WriteHeader(http.StatusOK)
-	json.NewEncoder(response).Encode(map[string]string{"error": err.Error()})
+
+	if err := json.NewEncoder(response).Encode(map[string]string{"error": err.Error()}); err != nil {
+		internalServerError(response, err)
+	}
 }

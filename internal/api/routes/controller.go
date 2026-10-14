@@ -5,11 +5,10 @@ import (
 
 	"github.com/lukas-sgx/borrow/internal/api/routes/instances"
 	"github.com/lukas-sgx/borrow/pkg/operatools"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func routesInstance(conciliator *operatools.Conciliator, client client.Client) http.Handler {
-	endpoints := instances.NewEndpoints(conciliator, client)
+func routesInstance(conciliator *operatools.Conciliator) http.Handler {
+	endpoints := instances.NewEndpoints(conciliator)
 
 	sub := http.NewServeMux()
 	sub.HandleFunc("POST /add", endpoints.Add)
@@ -19,12 +18,12 @@ func routesInstance(conciliator *operatools.Conciliator, client client.Client) h
 	return sub
 }
 
-func Routes(conciliator *operatools.Conciliator, client client.Client) http.Handler {
+func Routes(conciliator *operatools.Conciliator) http.Handler {
 	basePath := "/api/v1"
 
 	mux := http.NewServeMux()
 	mux.Handle(basePath+"/instances/",
-		http.StripPrefix(basePath+"/instances", routesInstance(conciliator, client)))
+		http.StripPrefix(basePath+"/instances", routesInstance(conciliator)))
 
 	return mux
 }

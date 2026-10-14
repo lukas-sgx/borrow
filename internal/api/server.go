@@ -32,7 +32,7 @@ func (s *Server) Start(ctx context.Context) error {
 	conciliator := operatools.NewConciliator(ctrl.Log, nil, s.Client, ctx)
 	srv := &http.Server{
 		Addr:    s.Addr,
-		Handler: controller.Routes(conciliator, s.Client),
+		Handler: controller.Routes(conciliator),
 	}
 
 	go s.shutdownServer(ctx, srv)
