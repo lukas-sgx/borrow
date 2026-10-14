@@ -7,6 +7,8 @@ import (
 	"time"
 
 	controller "github.com/lukas-sgx/borrow/internal/api/routes"
+	"github.com/lukas-sgx/borrow/pkg/operatools"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -27,8 +29,11 @@ func (s *Server) shutdownServer(ctx context.Context, srv *http.Server) {
 }
 
 func (s *Server) Start(ctx context.Context) error {
-
-	srv := &http.Server{Addr: s.Addr, Handler: controller.Routes()}
+	conciliator := operatools.NewConciliator(ctrl.Log, nil, s.Client, ctx)
+	srv := &http.Server{
+		Addr:    s.Addr,
+		Handler: controller.Routes(conciliator),
+	}
 
 	go s.shutdownServer(ctx, srv)
 

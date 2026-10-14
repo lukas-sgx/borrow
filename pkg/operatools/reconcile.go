@@ -27,7 +27,7 @@ func Reconcile(r Reconciler, c client.Client, req ctrl.Request,
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	conciliator := newConciliator(ctrl.Log, object)
+	conciliator := NewConciliator(ctrl.Log, object, c, ctx)
 
 	if err := processRessource(conciliator, req, r); err != nil {
 		return ctrl.Result{}, err

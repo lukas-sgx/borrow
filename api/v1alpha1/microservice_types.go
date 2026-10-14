@@ -27,15 +27,13 @@ import (
 type MicroserviceSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of Microservice. Edit microservice_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
 }
 
 // MicroserviceStatus defines the observed state of Microservice.
 type MicroserviceStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	MsList []string `json:"ms_list,omitempty"`
 }
 
 // +kubebuilder:object:root=true
